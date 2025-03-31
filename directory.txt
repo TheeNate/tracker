@@ -1,0 +1,51 @@
+NDTtracker2.1
+    /config
+      db.js
+    /controllers
+      entryController.js
+    /middleware
+      authMiddleware.js
+    /public
+      /css
+        styles.css
+      /js
+        bundle.js
+        bundle.js.txt
+        bundle.js.map
+    /routes
+      entryRoutes.js
+      authRoutes.js
+      companyRoutes.js
+      methodRoutes.js
+      signatureRoutes.js
+    /src
+      /js
+        app.js
+        /utils
+          api.js
+          dateUtils.js
+          domUtils.js
+        /modules
+          entryManager.js
+          exportManager.js
+          signatureManager.js
+          uiManager.js
+    /node_modules
+        (containse way too manay foldres to list)
+    /views
+      login.html
+      register.html
+      forgot-password.html
+      reset-password.html
+      /errors
+        404.html
+        500.html
+      /tracker
+        index.html
+      
+package.json
+package-lock.json
+server.js
+webpack.config.js
+.env
+directory.txt       

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - NDT Hours Tracker</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap">
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    .admin-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .admin-card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .user-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .user-table th,
+    .user-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .user-table th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+    }
+    
+    .user-table tr:hover {
+      background-color: #f9f9f9;
+    }
+    
+    .action-btn {
+      margin-right: 5px;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: none;
+      font-size: 12px;
+    }
+    
+    .reset-btn {
+      background-color: #4a6da7;
+      color: white;
+    }
+    
+    .admin-btn {
+      background-color: #28a745;
+      color: white;
+    }
+    
+    .revoke-btn {
+      background-color: #ffc107;
+      color: black;
+    }
+    
+    .delete-btn {
+      background-color: #dc3545;
+      color: white;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.5);
+    }
+    
+    .modal-content {
+      background-color: #fefefe;
+      margin: 10% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 400px;
+      border-radius: 8px;
+    }
+    
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .close:hover {
+      color: black;
+    }
+    
+    .modal h2 {
+      color: #4a6da7;
+      margin-top: 0;
+    }
+    
+    #searchInput {
+      padding: 8px;
+      margin-bottom: 15px;
+      width: 300px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    .stats-container {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .stat-card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 20px;
+      flex: 1;
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 32px;
+      font-weight: bold;
+      color: #4a6da7;
+      margin: 10px 0;
+    }
+    
+    .stat-label {
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .success-message,
+    .error-message {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      display: none;
+    }
+    
+    .success-message {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .error-message {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .admin-badge {
+      background-color: #4a6da7;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+    
+    @media (max-width: 768px) {
+      .stats-container {
+        flex-direction: column;
+      }
+      
+      .user-table {
+        display: block;
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="user-nav">
+    <span id="userDisplay">Loading...</span>
+    <div>
+      <a href="/tracker" class="nav-btn">Dashboard</a>
+      <button id="logoutBtn" class="nav-btn">Logout</button>
+    </div>
+  </div>
+  
+  <div class="admin-container">
+    <div class="admin-header">
+      <h1>Admin Dashboard</h1>
+    </div>
+    
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="stat-label">Total Users</div>
+        <div class="stat-number" id="totalUsers">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Admin Users</div>
+        <div class="stat-number" id="adminUsers">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">New Users (Last 30 Days)</div>
+        <div class="stat-number" id="newUsers">0</div>
+      </div>
+    </div>
+    
+    <div class="admin-card">
+      <h2>User Management</h2>
+      <input type="text" id="searchInput" placeholder="Search users...">
+      
+      <div id="successMessage" class="success-message"></div>
+      <div id="errorMessage" class="error-message"></div>
+      
+      <table class="user-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Created</th>
+            <th>Role</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="userTableBody">
+          <!-- Populated via JavaScript -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- Reset Password Modal -->
+  <div id="resetPasswordModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Reset User Password</h2>
+      <p>Enter a new password for <strong id="resetUsername"></strong>:</p>
+      <form id="resetPasswordForm">
+        <input type="hidden" id="resetUserId">
+        <div style="margin-bottom: 15px;">
+          <input type="password" id="newPassword" placeholder="New Password" style="width: 100%; padding: 8px;">
+        </div>
+        <button type="submit" style="background-color: #4a6da7; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">Reset Password</button>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Delete User Confirmation Modal -->
+  <div id="deleteUserModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Delete User</h2>
+      <p>Are you sure you want to delete user <strong id="deleteUsername"></strong>?</p>
+      <p style="color: #dc3545; font-weight: bold;">This action cannot be undone!</p>
+      <input type="hidden" id="deleteUserId">
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button id="cancelDeleteBtn" style="background-color: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">Cancel</button>
+        <button id="confirmDeleteBtn" style="background-color: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">Delete User</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Fetch current user
+      fetch('/api/user')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById('userDisplay').textContent = `Admin: ${data.user.full_name}`;
+          }
+        })
+        .catch(error => console.error('Error fetching user info:', error));
+      
+      // Logout button
+      document.getElementById('logoutBtn').addEventListener('click', function() {
+        window.location.href = '/logout';
+      });
+      
+      // Fetch all users
+      function fetchUsers() {
+        fetch('/admin/api/users')
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              renderUsers(data.data);
+              updateStats(data.data);
+            }
+          })
+          .catch(error => console.error('Error fetching users:', error));
+      }
+      
+      // Render users table
+      function renderUsers(users) {
+        const tableBody = document.getElementById('userTableBody');
+        tableBody.innerHTML = '';
+        
+        users.forEach(user => {
+          const row = document.createElement('tr');
+          
+          // Format date
+          const createdDate = new Date(user.created_at).toLocaleDateString();
+          
+          row.innerHTML = `
+            <td>${user.id}</td>
+            <td>${user.username}</td>
+            <td>${user.full_name}</td>
+            <td>${user.email}</td>
+            <td>${createdDate}</td>
+            <td>${user.is_admin ? '<span class="admin-badge">Admin</span>' : 'User'}</td>
+            <td>
+              <button class="action-btn reset-btn" data-id="${user.id}" data-username="${user.username}">Reset Password</button>
+              ${user.is_admin ? 
+                `<button class="action-btn revoke-btn" data-id="${user.id}">Revoke Admin</button>` : 
+                `<button class="action-btn admin-btn" data-id="${user.id}">Make Admin</button>`
+              }
+              <button class="action-btn delete-btn" data-id="${user.id}" data-username="${user.username}">Delete</button>
+            </td>
+          `;
+          
+          tableBody.appendChild(row);
+        });
+        
+        // Add event listeners for buttons
+        addButtonEventListeners();
+      }
+      
+      // Add event listeners to action buttons
+      function addButtonEventListeners() {
+        // Reset password buttons
+        document.querySelectorAll('.reset-btn').forEach(button => {
+          button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-id');
+            const username = this.getAttribute('data-username');
+            document.getElementById('resetUserId').value = userId;
+            document.getElementById('resetUsername').textContent = username;
+            document.getElementById('resetPasswordModal').style.display = 'block';
+          });
+        });
+        
+        // Make/Revoke admin buttons
+        document.querySelectorAll('.admin-btn, .revoke-btn').forEach(button => {
+          button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-id');
+            toggleAdminStatus(userId);
+          });
+        });
+        
+        // Delete buttons
+        document.querySelectorAll('.delete-btn').forEach(button => {
+          button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-id');
+            const username = this.getAttribute('data-username');
+            document.getElementById('deleteUserId').value = userId;
+            document.getElementById('deleteUsername').textContent = username;
+            document.getElementById('deleteUserModal').style.display = 'block';
+          });
+        });
+      }
+      
+      // Update dashboard stats
+      function updateStats(users) {
+        const adminUsers = users.filter(user => user.is_admin === 1).length;
+        
+        // Calculate users in the last 30 days
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        const newUsers = users.filter(user => {
+          const createdDate = new Date(user.created_at);
+          return createdDate > thirtyDaysAgo;
+        }).length;
+        
+        document.getElementById('totalUsers').textContent = users.length;
+        document.getElementById('adminUsers').textContent = adminUsers;
+        document.getElementById('newUsers').textContent = newUsers;
+      }
+      
+      // Reset password form submission
+      document.getElementById('resetPasswordForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const userId = document.getElementById('resetUserId').value;
+        const newPassword = document.getElementById('newPassword').value;
+        
+        if (!newPassword) {
+          showMessage('error', 'Please enter a new password');
+          return;
+        }
+        
+        fetch(`/admin/api/users/${userId}/reset-password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ newPassword })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById('resetPasswordModal').style.display = 'none';
+            document.getElementById('resetPasswordForm').reset();
+            showMessage('success', data.message);
+          } else {
+            showMessage('error', data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error resetting password:', error);
+          showMessage('error', 'An error occurred while resetting the password');
+        });
+      });
+      
+      // Toggle admin status
+      function toggleAdminStatus(userId) {
+        fetch(`/admin/api/users/${userId}/toggle-admin`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            showMessage('success', data.message);
+            fetchUsers(); // Refresh user list
+          } else {
+            showMessage('error', data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error toggling admin status:', error);
+          showMessage('error', 'An error occurred while updating admin status');
+        });
+      }
+      
+      // Delete user
+      document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+        const userId = document.getElementById('deleteUserId').value;
+        
+        fetch(`/admin/api/users/${userId}`, {
+          method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('deleteUserModal').style.display = 'none';
+          
+          if (data.success) {
+            showMessage('success', data.message);
+            fetchUsers(); // Refresh user list
+          } else {
+            showMessage('error', data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error deleting user:', error);
+          document.getElementById('deleteUserModal').style.display = 'none';
+          showMessage('error', 'An error occurred while deleting the user');
+        });
+      });
+      
+      // Cancel delete button
+      document.getElementById('cancelDeleteBtn').addEventListener('click', function() {
+        document.getElementById('deleteUserModal').style.display = 'none';
+      });
+      
+      // Close modal when clicking on X or outside
+      document.querySelectorAll('.close').forEach(element => {
+        element.addEventListener('click', function() {
+          document.querySelectorAll('.modal').forEach(modal => {
+            modal.style.display = 'none';
+          });
+        });
+      });
+      
+      window.addEventListener('click', function(event) {
+        document.querySelectorAll('.modal').forEach(modal => {
+          if (event.target === modal) {
+            modal.style.display = 'none';
+          }
+        });
+      });
+      
+      // Search functionality
+      document.getElementById('searchInput').addEventListener('input', function() {
+        const searchValue = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#userTableBody tr');
+        
+        rows.forEach(row => {
+          const username = row.cells[1].textContent.toLowerCase();
+          const fullName = row.cells[2].textContent.toLowerCase();
+          const email = row.cells[3].textContent.toLowerCase();
+          
+          if (username.includes(searchValue) || fullName.includes(searchValue) || email.includes(searchValue)) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      });
+      
+      // Show success or error message
+      function showMessage(type, message) {
+        const element = document.getElementById(type === 'success' ? 'successMessage' : 'errorMessage');
+        element.textContent = message;
+        element.style.display = 'block';
+        
+        // Hide other message
+        document.getElementById(type === 'success' ? 'errorMessage' : 'successMessage').style.display = 'none';
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+          element.style.display = 'none';
+        }, 5000);
+      }
+      
+      // Initial data load
+      fetchUsers();
+    });
+  </script>
+</body>
+</html>

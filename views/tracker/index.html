@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NDT HOURS TRACKER</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+  <div class="top-nav">
+    <a href="/tracker" class="nav-link">NDT Tracker</a>
+    <a href="/rope" class="nav-link">Rope Hours</a>
+  </div>
+  
+  <div class="user-nav">
+    <span id="userDisplay">Loading...</span>
+    <button id="logoutBtn" class="nav-btn">Logout</button>
+  </div>
+  
+  <h1>NDT Hours Tracker</h1>
+
+  <!-- Main Tracker Table -->
+  <div class="table-container">
+    <table id="trackerTable">
+      <thead>
+        <tr>
+          <th></th>
+          <th>DATE</th>
+          <th>METHOD</th>
+          <th>LOCATION</th>
+          <th>HOURS</th>
+          <th>COMPANY</th>
+          <th>SUPERVISOR</th>
+          <th>SIGNATURE HASH</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="delete-btn">&times;</span></td>
+          <td><input type="date"></td>
+          <td>
+            <select class="methodSelect">
+              <option value="">Select Method</option>
+              <option>UT</option>
+              <option>UTT</option>
+              <option>RT</option>
+              <option>MT</option>
+              <option>PT</option>
+              <option>ADD METHOD</option>
+            </select>
+          </td>
+          <td><input type="text" placeholder="Enter location"></td>
+          <td><input type="number" placeholder="Enter hours" min="0" step="0.1"></td>
+          <td>
+            <select class="companySelect">
+              <option value="">Select Company</option>
+              <option>Mistras</option>
+              <option>Company B</option>
+              <option>ADD COMPANY</option>
+            </select>
+          </td>
+          <td><button class="signBtn">Request Signature</button></td>
+          <td class="hash-cell"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <button id="addLineBtn">ADD LINE</button>
+
+  <!-- Total Hours Display -->
+  <div id="totalHours">
+    <h2>Total Hours: <span id="totalHoursValue">0</span></h2>
+  </div>
+
+  <!-- Method Breakdown Table -->
+  <div class="table-container">
+    <div id="methodBreakdown">
+      <h2>Hours by Method</h2>
+      <table id="methodTable">
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Hours</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Dynamically populated in JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <button id="exportPDFBtn">EXPORT TO PDF</button>
+  <button id="refreshBtn">Refresh Signatures</button>
+
+  <!-- Signature Request Modal -->
+  <div id="signatureModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Request Signature</h2>
+      <form id="signatureForm">
+        <label for="supervisorName">Supervisor Name:</label>
+        <input type="text" id="supervisorName" name="supervisorName" required>
+  
+        <label for="supervisorEmail">Supervisor Email:</label>
+        <input type="email" id="supervisorEmail" name="supervisorEmail" required>
+  
+        <label for="supervisorCompany">Supervisor Company:</label>
+        <input type="text" id="supervisorCompany" name="supervisorCompany">
+  
+        <label for="asnt">ASNT Number (optional):</label>
+        <input type="text" id="asnt" name="asnt">
+  
+        <label for="certLevel">Certification Level:</label>
+        <input type="text" id="certLevel" name="certLevel">
+  
+        <button type="submit">Submit Signature Request</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Verification Modal -->
+  <div id="verificationModal" class="verification-modal">
+    <div class="verification-modal-content">
+      <span class="close">&times;</span>
+      <h2>Verification Details</h2>
+      <div class="verification-details">
+        <p><strong>Method:</strong> <span id="verifyMethod"></span></p>
+        <p><strong>Hours:</strong> <span id="verifyHours"></span></p>
+        <p><strong>Supervisor:</strong> <span id="verifySupervisor"></span></p>
+        <p><strong>Verification Date:</strong> <span id="verifyDate"></span></p>
+        <p><strong>Cryptographic Hash:</strong></p>
+        <div class="hash-display" id="verifyHash"></div>
+      </div>
+      <p>This verification is tamper-proof and timestamped to ensure the integrity of this certification record.</p>
+    </div>
+  </div>
+
+  <!-- Include jsPDF and autoTable -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+  
+  <!-- Application Scripts -->
+  <script src="/js/bundle.js"></script>
+
+
+<script>
+  // Direct event handlers for verification modal
+  document.addEventListener('DOMContentLoaded', function() {
+    // Handle close button click
+    const closeBtn = document.querySelector('#verificationModal .close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function() {
+        document.getElementById('verificationModal').style.display = 'none';
+      });
+    }
+    
+    // Handle click outside modal
+    const verificationModal = document.getElementById('verificationModal');
+    if (verificationModal) {
+      verificationModal.addEventListener('click', function(event) {
+        if (event.target === verificationModal) {
+          verificationModal.style.display = 'none';
+        }
+      });
+    }
+  });
+</script>
+</body>
+</html>
