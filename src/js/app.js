@@ -11,8 +11,6 @@ import RopeEntryManager from './modules/ropeEntryManager.js';
 import RopeUIManager from './modules/ropeUIManager.js';
 import RopeSignatureManager from './modules/RopeSignatureManager.js';
 
-
-
 // Initialize application on DOM load
 document.addEventListener('DOMContentLoaded', () => {
   const pathname = window.location.pathname;
@@ -42,15 +40,38 @@ document.addEventListener('DOMContentLoaded', () => {
     entryManager.fetchEntries();
     uiManager.fetchUserInfo();
     uiManager.enhanceResponsiveBehavior();
+    
+    // Refresh signatures initially
+    signatureManager.refreshSignatures();
 
   } else if (pathname === '/rope') {
     const ropeUI = new RopeUIManager();
-const ropeManager = new RopeEntryManager(ropeUI);
-const ropeSignature = new RopeSignatureManager(ropeUI);
-ropeUI.entryManager = ropeManager;
-ropeUI.signatureManager = ropeSignature;
-ropeManager.fetchEntries();
-
+    const ropeManager = new RopeEntryManager(ropeUI);
+    const ropeSignature = new RopeSignatureManager(ropeUI);
+    
+    // Set up the connections
+    ropeUI.entryManager = ropeManager;
+    ropeUI.signatureManager = ropeSignature;
+    
+    // Initialize event listeners for refresh button
+    const refreshBtn = document.getElementById('refreshRopeSignaturesBtn');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', () => {
+        ropeSignature.refreshSignatures();
+      });
+    }
+    
+    // Fetch initial data
+    ropeManager.fetchEntries();
+    
+    // Refresh signatures initially
+    ropeSignature.refreshSignatures();
+    
+    // Store reference to app components in window for external access
+    window.ropeApp = {
+      ui: ropeUI,
+      entryManager: ropeManager,
+      signatureManager: ropeSignature
+    };
   }
 });
-

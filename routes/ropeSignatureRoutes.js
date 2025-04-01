@@ -9,6 +9,9 @@ const { requireAuth } = require('../middleware/authMiddleware');
 router.post('/request', requireAuth, ropeSignatureController.requestSignature);
 
 // 🌐 Public route: supervisor confirms signature via email
-router.get('/confirm', ropeSignatureController.confirmSignature);
+router.get('/verify/:id', ropeSignatureController.verifySignature);
+
+// 🌐 Public route: handle verification form submission
+router.post('/submitVerification', ropeSignatureController.submitVerification);
 
 module.exports = router;

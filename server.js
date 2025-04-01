@@ -30,11 +30,6 @@ const ropeRoutes = require('./routes/ropeRoutes');
 const ropeSignatureRoutes = require('./routes/ropeSignatureRoutes');
 const ropeSignatureController = require('./controllers/ropeSignatureController');
 
-
-
-
-
-
 // Initialize Express app
 const app = express();
 
@@ -66,6 +61,7 @@ app.use(session({
 // Import middleware
 const { requireAuth } = require('./middleware/authMiddleware');
 
+// NDT Signatures confirmation handler
 app.get('/confirm', signatureRoutes.handlers.confirmSignature);
 
 // Apply routes
@@ -78,12 +74,14 @@ app.use('/admin', adminRoutes);
 app.use('/api/rope-entries', ropeRoutes);
 app.use('/api/rope-signatures', ropeSignatureRoutes);
 
-
-
-
 // Route to the main tracker interface
 app.get('/tracker', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'views/tracker/index.html'));
+});
+
+// Rope Access Hours interface
+app.get('/rope', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'views/rope/index.html'));
 });
 
 // Default route
@@ -95,13 +93,64 @@ app.get('/', (req, res) => {
   }
 });
 
-app.get('/rope', requireAuth, (req, res) => {
-  res.sendFile(path.join(__dirname, 'views/rope/index.html'));
-});
+// ===== ROPE SIGNATURE ROUTES =====
 
+// Rope signature confirmation page (displays the form for verification)
 app.get('/confirm/rope-signature', ropeSignatureController.confirmSignature);
 
+// Handle rope signature verification form submission
+app.post('/api/rope-signatures/submitVerification', ropeSignatureController.submitVerification);
 
+// Get all signatures for current user's rope entries
+app.get('/api/rope-signatures', requireAuth, async (req, res) => {
+  const userId = req.session.userId;
+  
+  db.query(
+    `SELECT rs.id, rs.entry_id, rs.auto_signature, rs.status, rs.timestamp_hash, 
+            re.tasks, re.rope_hours
+     FROM rope_signatures rs
+     JOIN rope_entries re ON rs.entry_id = re.id
+     WHERE rs.status = "Confirmed" AND re.user_id = ?`,
+    [userId],
+    (err, results) => {
+      if (err) {
+        console.error('Database fetch error:', err);
+        return res.status(500).json({ success: false, message: 'Failed to fetch signatures' });
+      }
+
+      res.json({ success: true, data: results });
+    }
+  );
+});
+
+// Get verification details for a specific rope signature
+app.get('/api/rope-signatures/verify/:id', requireAuth, (req, res) => {
+  const signatureId = req.params.id;
+  const userId = req.session.userId;
+  
+  db.query(
+    `SELECT rs.verification_date, rs.cert_level, rs.employee_id, rs.cert_number 
+     FROM rope_signatures rs
+     JOIN rope_entries re ON rs.entry_id = re.id
+     WHERE rs.id = ? AND re.user_id = ?`,
+    [signatureId, userId],
+    (err, results) => {
+      if (err || results.length === 0) {
+        return res.status(404).json({ success: false, message: 'Signature not found or unauthorized' });
+      }
+      
+      res.json({ 
+        success: true, 
+        verification_date: results[0].verification_date,
+        cert_level: results[0].cert_level,
+        employee_id: results[0].employee_id,
+        cert_number: results[0].cert_number
+      });
+    }
+  );
+});
+
+// ===== END ROPE SIGNATURE ROUTES =====
 
 // 404 handler
 app.use((req, res) => {

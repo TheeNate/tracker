@@ -22,7 +22,7 @@
       <label for="supervisorCompany">Supervisor Company:</label>
       <input type="text" id="supervisorCompany" name="supervisorCompany">
     
-      <label for="asnt">ASNT Number (optional):</label>
+      <label for="asnt">IRATA/SPRAT Number (optional):</label>
       <input type="text" id="asnt" name="asnt">
     
       <label for="certLevel">Certification Level:</label>
@@ -30,7 +30,24 @@
     
       <button type="submit">Submit Request</button>
     </form>
-    
+  </div>
+</div>
+
+<!-- Verification Modal -->
+<div id="ropeVerificationModal" class="verification-modal">
+  <div class="verification-modal-content">
+    <span class="close">&times;</span>
+    <h2>Verification Details</h2>
+    <div class="verification-details">
+      <p><strong>Tasks:</strong> <span id="verifyTasks"></span></p>
+      <p><strong>Hours:</strong> <span id="verifyHours"></span></p>
+      <p><strong>Supervisor:</strong> <span id="verifySupervisor"></span></p>
+      <p><strong>Verification Date:</strong> <span id="verifyDate"></span></p>
+      <p><strong>Certification:</strong> <span id="verifyCertInfo"></span></p>
+      <p><strong>Cryptographic Hash:</strong></p>
+      <div class="hash-display" id="verifyHash"></div>
+    </div>
+    <p>This verification is tamper-proof and timestamped to ensure the integrity of this certification record.</p>
   </div>
 </div>
 
@@ -91,7 +108,40 @@
     <h2>Total Rope Hours: <span id="totalRopeHoursValue">0</span></h2>
   </div>
 
-  <!-- Signature Modal, Export, etc. would go here later -->
+  <button id="refreshRopeSignaturesBtn">Refresh Signatures</button>
+  
+  <!-- Direct event handlers for verification modal -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Handle close button click
+      const closeButtons = document.querySelectorAll('.verification-modal .close');
+      closeButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.getElementById('ropeVerificationModal').style.display = 'none';
+        });
+      });
+      
+      // Handle click outside modal
+      const verificationModal = document.getElementById('ropeVerificationModal');
+      if (verificationModal) {
+        verificationModal.addEventListener('click', function(event) {
+          if (event.target === verificationModal) {
+            verificationModal.style.display = 'none';
+          }
+        });
+      }
+      
+      // Add refresh button handler
+      const refreshBtn = document.getElementById('refreshRopeSignaturesBtn');
+      if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+          if (window.ropeApp && window.ropeApp.signatureManager) {
+            window.ropeApp.signatureManager.refreshSignatures();
+          }
+        });
+      }
+    });
+  </script>
 
   <script src="/js/bundle.js"></script>
 </body>
