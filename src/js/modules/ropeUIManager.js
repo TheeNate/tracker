@@ -39,6 +39,9 @@ export default class RopeUIManager {
     const row = document.createElement('tr');
     row.dataset.entryId = entry.id;
     
+    // Debug log to check date values
+    console.log('Adding row with entry:', entry);
+    
     row.innerHTML = `
       <td><span class="delete-btn">&times;</span></td>
       <td><input type="date" value="${entry.date_from || ''}"></td>
@@ -73,6 +76,7 @@ export default class RopeUIManager {
         }
         
         const updated = this.getRowData(row);
+        console.log('Input changed, saving data:', updated);
         this.entryManager.updateEntry(entry.id, updated);
       });
     });
@@ -97,8 +101,8 @@ export default class RopeUIManager {
   getRowData(row) {
     const inputs = row.querySelectorAll('input');
     return {
-      date_from: inputs[0].value,
-      date_to: inputs[1].value,
+      date_from: inputs[0].value || null,  // Return null if empty
+      date_to: inputs[1].value || null,    // Return null if empty
       company: inputs[2].value,
       location: inputs[3].value,
       tasks: inputs[4].value,

@@ -457,3 +457,192 @@ button.danger {
   background-color: var(--primary-color);
   color: white;
 }
+
+/* Enhanced mobile styling for collapsible entries */
+@media screen and (max-width: 767px) {
+  /* Hide table header on mobile */
+  #trackerTable thead,
+  #ropeTable thead {
+    display: none;
+  }
+  
+  /* Remove table styling */
+  #trackerTable, #trackerTable tbody, #trackerTable tr,
+  #ropeTable, #ropeTable tbody, #ropeTable tr {
+    display: block;
+    width: 100%;
+  }
+  
+  /* Style each row as a collapsible card */
+  #trackerTable tr,
+  #ropeTable tr {
+    margin-bottom: 10px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+    padding: 0; /* Remove padding - will be added to preview area */
+    overflow: hidden; /* Hide expanded content */
+    transition: all 0.3s ease;
+  }
+  
+  /* Create preview section that's always visible */
+  #trackerTable tr::before,
+  #ropeTable tr::before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 30px;
+    height: 30px;
+    background-color: var(--primary-color);
+    clip-path: polygon(100% 0, 0 0, 100% 100%);
+    z-index: 1;
+  }
+  
+  /* Preview area shows essential info + toggle indicator */
+  .entry-preview {
+    display: flex;
+    padding: 12px 15px;
+    position: relative;
+    cursor: pointer;
+    min-height: 50px;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+  }
+  
+  /* Preview content layout */
+  .preview-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  
+  /* Primary info (method + hours or task + hours) */
+  .preview-primary {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 2px;
+  }
+  
+  /* Secondary info (date + location) */
+  .preview-secondary {
+    font-size: 12px;
+    color: #666;
+  }
+  
+  /* Toggle indicator with animation */
+  .toggle-indicator {
+    width: 24px;
+    height: 24px;
+    position: relative;
+    transition: transform 0.3s ease;
+  }
+  
+  .toggle-indicator::before,
+  .toggle-indicator::after {
+    content: "";
+    position: absolute;
+    background-color: var(--primary-color);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  .toggle-indicator::before {
+    width: 14px;
+    height: 2px;
+  }
+  
+  .toggle-indicator::after {
+    height: 14px;
+    width: 2px;
+    transition: transform 0.3s ease;
+  }
+  
+  /* Expanded state styling */
+  #trackerTable tr.expanded,
+  #ropeTable tr.expanded {
+    padding-bottom: 10px; /* Add space at bottom when expanded */
+  }
+  
+  #trackerTable tr.expanded .toggle-indicator::after,
+  #ropeTable tr.expanded .toggle-indicator::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+  
+  /* Main content area (hidden by default) */
+  .entry-details {
+    display: none;
+    padding: 0 15px;
+  }
+  
+  #trackerTable tr.expanded .entry-details,
+  #ropeTable tr.expanded .entry-details {
+    display: block;
+  }
+  
+  /* Style each field as a labeled input group */
+  .input-group {
+    margin-bottom: 10px;
+    position: relative;
+  }
+  
+  .input-group label {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 2px;
+  }
+  
+  /* Style the delete button to be positioned in preview area */
+  #trackerTable tr .delete-btn,
+  #ropeTable tr .delete-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    margin: 0;
+    z-index: 2;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    background-color: rgba(255,255,255,0.7);
+    border-radius: 50%;
+  }
+  
+  /* Hide standard field labels on mobile */
+  #trackerTable td:before,
+  #ropeTable td:before {
+    display: none;
+  }
+  
+  /* Fix the first TD with delete button */
+  #trackerTable td:first-child,
+  #ropeTable td:first-child {
+    display: none;
+  }
+  
+  /* Make sure all cells are block elements */
+  #trackerTable td,
+  #ropeTable td {
+    display: block;
+    padding: 5px 0;
+    border: none;
+    min-height: auto;
+  }
+  
+  /* Actions row (signature request, etc.) */
+  .entry-actions {
+    margin-top: 10px;
+    padding: 0 15px 10px;
+    text-align: right;
+  }
+  
+  /* Extra padding for signature/hash cell */
+  #trackerTable td.hash-cell,
+  #ropeTable td.hash-cell {
+    margin-top: 10px;
+  }
+}

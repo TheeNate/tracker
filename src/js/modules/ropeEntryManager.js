@@ -10,7 +10,29 @@ export default class RopeEntryManager {
     try {
       const response = await this.api.get('/api/rope-entries');
       if (!response.success) return console.error('Fetch failed:', response.message);
-      this.uiManager.renderEntries(response.data);
+      
+      // Process dates into the format expected by date inputs (YYYY-MM-DD)
+      const processedData = response.data.map(entry => {
+        // Format date_from if it exists
+        if (entry.date_from) {
+          const date = new Date(entry.date_from);
+          if (!isNaN(date.getTime())) {
+            entry.date_from = date.toISOString().split('T')[0];
+          }
+        }
+        
+        // Format date_to if it exists
+        if (entry.date_to) {
+          const date = new Date(entry.date_to);
+          if (!isNaN(date.getTime())) {
+            entry.date_to = date.toISOString().split('T')[0];
+          }
+        }
+        
+        return entry;
+      });
+      
+      this.uiManager.renderEntries(processedData);
       this.uiManager.updateTotal();
     } catch (err) {
       console.error('Fetch error:', err);
@@ -43,7 +65,13 @@ export default class RopeEntryManager {
 
   async updateEntry(id, data) {
     try {
-      const res = await this.api.put(`/api/rope-entries/${id}`, data);
+      // Ensure dates are in the correct format for the server
+      const processedData = { ...data };
+      
+      // Add logging to debug date values
+      console.log('Updating entry:', id, 'with data:', processedData);
+      
+      const res = await this.api.put(`/api/rope-entries/${id}`, processedData);
       if (!res.success) console.error('Update failed:', res.message);
       this.uiManager.updateTotal();
     } catch (err) {
